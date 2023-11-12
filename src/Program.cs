@@ -54,8 +54,8 @@ namespace GenerateSwitchDecTitleKey
                     //only checking if we need to extract the dectitlekey or not
                     if (zip.Entries.Any(x => x.Name.EndsWith(".dectitlekey.bin")))
                     {
-                        Console.WriteLine("No need to extract key, already exists in zip.");
-                        return;
+                        Console.WriteLine("No need to extract key, it already exist in zip.");
+                        continue;
                     }
 
                     //get the encrypted title key
@@ -88,7 +88,6 @@ namespace GenerateSwitchDecTitleKey
                     {
                         //using (MemoryStream ms = new MemoryStream())
                         //{
-                            //reads the whole file into memory, takes about 25s, will run out of memory
                             using (Stream unzippedEntryStream = mainNcaEntry.Open())
                             {
                                 //we just need the first amount of bytes
@@ -109,7 +108,8 @@ namespace GenerateSwitchDecTitleKey
                                         byte[] decTitleKey = nca.GetDecryptedTitleKey();
                                         string decryptedTitleKey = Convert.ToHexString(decTitleKey);
 
-                                        string decryptedFilePath = AppDomain.CurrentDomain.BaseDirectory + titleKeyName + ".dectitlekey.bin";
+                                        string entryName = titleKeyName + ".dectitlekey.bin";
+                                        string decryptedFilePath = AppDomain.CurrentDomain.BaseDirectory + entryName;
 
                                         File.WriteAllBytes(decryptedFilePath, decTitleKey);
                                     }
