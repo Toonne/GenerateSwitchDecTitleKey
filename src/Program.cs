@@ -67,8 +67,6 @@ namespace GenerateSwitchDecTitleKey
                         {
                             using (MemoryStream ms = new MemoryStream())
                             {
-                                Console.WriteLine("Reading nca into memory, this might take a while and use a lot of RAM");
-
                                 unzippedEntryStream.CopyTo(ms);
                                 string encTitleKey = Convert.ToHexString(ms.ToArray());
 
@@ -88,14 +86,21 @@ namespace GenerateSwitchDecTitleKey
 
                     if (mainNcaEntry != null)
                     {
-                        using (MemoryStream ms = new MemoryStream())
-                        {
+                        //using (MemoryStream ms = new MemoryStream())
+                        //{
                             //reads the whole file into memory, takes about 25s, will run out of memory
                             using (Stream unzippedEntryStream = mainNcaEntry.Open())
                             {
-                                unzippedEntryStream.CopyTo(ms);
+                                //we just need the first amount of bytes
+                                byte[] chunk = new byte[10000];
+                                unzippedEntryStream.Read(chunk, 0, 10000);
+                                MemoryStream byteStream = new MemoryStream(chunk);
 
-                                using (IStorage ncaInFile = new StreamStorage(ms, true))
+                                //copying the whole stream runs out of memory
+                                //Console.WriteLine("Reading nca into memory, this might take a while and use a lot of RAM");
+                                //unzippedEntryStream.CopyTo(ms);
+
+                                using (IStorage ncaInFile = new StreamStorage(byteStream, true))
                                 {
                                     Nca nca = new Nca(keyset, ncaInFile);
 
@@ -107,7 +112,6 @@ namespace GenerateSwitchDecTitleKey
                                         string decryptedFilePath = AppDomain.CurrentDomain.BaseDirectory + titleKeyName + ".dectitlekey.bin";
 
                                         File.WriteAllBytes(decryptedFilePath, decTitleKey);
-
                                     }
                                     catch (MissingKeyException)
                                     {
@@ -115,7 +119,7 @@ namespace GenerateSwitchDecTitleKey
                                     }
                                 }
                             }
-                        }
+                        //}
                     }
 
                     Console.WriteLine("Done with [" + zipFile + "]");
